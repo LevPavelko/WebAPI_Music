@@ -8,7 +8,7 @@ using WebMusicAPI.ViewModel;
 namespace WebMusicAPI.Controllers
 {
     [ApiController]
-    [Route("api/Music")]
+    [Route("api/webMusic")]
     public class WebMusicController : ControllerBase
     {
         private readonly WebMusicContext _context;

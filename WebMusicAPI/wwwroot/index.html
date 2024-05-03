@@ -1,0 +1,85 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Document</title>
+    <link href="jquery-ui-1.12.1/ui-lightness/jquery-ui-1.10.3.custom.css" rel="stylesheet" />
+    <link rel="stylesheet" href="style.css">
+    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+    <script src="jquery-ui-1.12.1/external/jquery/jquery.js"></script>
+    <script src="jquery-ui-1.12.1/jquery-ui.min.js"></script>
+    <style type="text/css">
+        #accordion {
+            font-size: 1.1em;
+        }
+    </style>
+</head>
+<script>
+   
+   
+    $(document).ready(function () {
+      
+
+       
+       
+        $("#accordion").accordion();
+
+        $("#postGenreSubmit").click(function (e) {
+            e.preventDefault(); // Prevent the default form submission
+            let form = document.forms["postGenreForm"];
+            let genreName = form.elements["name"].value;
+
+            CreateGenre(genreName)
+        });
+    });
+    function CreateGenre(genreName) {
+        $.ajax({
+            url: "https://localhost:7107/api/webMusic/Genre",
+            contentType: "application/json",
+            method: "POST",
+            data: JSON.stringify({
+                name: genreName,
+               
+            }),
+            success: function () {
+                Swal.fire({
+                    position: "center",
+                    icon: "success",
+                    title: "Успешно добавленно",
+                    showConfirmButton: false,
+                    timer: 1500
+                });
+            },
+            error: function (x) {
+                Swal.fire({
+                    position: "center",
+                    
+                    icon: "error",
+                    title: "Что-то не так. Статус: " + x.status,
+                    showConfirmButton: false,
+                    timer: 1800
+                });
+            }
+        })
+    }
+</script>
+
+</head>
+<body>
+    <dl id="accordion">
+        <dt>Genre</dt>
+        <dd>
+            <form name="postGenreForm">
+                <p>Ввдите название жанра: </p>
+                <input type="text" value="" name="name">
+                <input type="submit" value="Create" id="postGenreSubmit">
+            </form>
+
+
+
+        </dd>
+    </dl>
+
+</body>
+</html>

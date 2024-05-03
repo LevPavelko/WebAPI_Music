@@ -44,6 +44,9 @@
                     showConfirmButton: false,
                     timer: 1500
                 });
+                let form = document.forms["postGenreForm"];
+                form.reset();
+                form.elements["id"].value = 0;
             },
             error: function (x) {
                 Swal.fire({
@@ -57,6 +60,29 @@
         });
     }
 
+    function EditStudent(genreId, genreName) {
+        let request = JSON.stringify({
+            id: genreId,
+            name: genreName
+          
+        });
+        $.ajax({
+            url: "https://localhost:7107/api/webMusic/Genre",
+            contentType: "application/json",
+            method: "PUT",
+            data: request,
+            success: function (student) {
+                alert("as");
+                let form = document.forms["postGenreForm"];
+                form.reset();
+                form.elements["id"].value = 0;
+            },
+            error: function (x) {
+                alert(x.status);
+            }
+        })
+    }
+
     function getGenres() {
         $.ajax({
             url: "https://localhost:7107/api/webMusic/Genre",
@@ -66,7 +92,7 @@
                 var genresHtml = "";
 
                 $.each(genres, function (index, genre) {
-                    genresHtml += "<div>" + genre.name + "</div>";
+                    genresHtml += "<div><button id='genreChange' class='editLink'  data-id='" + genre.id + "'>change</button>" + genre.name + "</div>";
                 });
 
                 updateContent("genresContainer", genresHtml);
@@ -84,6 +110,22 @@
             }
         });
     }
+    function GetGenre(id) {
+        $.ajax({
+            url: "https://localhost:7107/api/webMusic/Genre" + id,
+            method: 'GET',
+            contentType: "application/json",
+            success: function (genre) {
+                let form = document.forms["postGenreForm"];
+                form.elements["id"].value = genre.id;
+                form.elements["name"].value = genre.name;
+              
+            },
+            error: function (x) {
+                alert(x.status);
+            }
+        });
+    }
 
     $(document).ready(function () {
 
@@ -97,14 +139,21 @@
         $("#postGenreSubmit").click(function (e) {
             e.preventDefault();
             let form = document.forms["postGenreForm"];
+            let genreId = form.elements["id"].value;
             let genreName = form.elements["name"].value;
-
-            CreateGenre(genreName)
+            if (genreId == 0)
+                CreateGenre(genreName)
+            else
+                EditStudent(genreId, genreName);
+            
         });
-
+        
         $("#getGenresSubmit").click(getGenres);
         
-       
+        $("body").on("click", ".editLink", function () {
+            let id = $(this).data("id");
+            GetGenre(id);
+        });
     });
 </script>
 
@@ -123,9 +172,10 @@
                 </tr>
             </table>
             <form name="postGenreForm">
-                <p>Ввдите название жанра: </p>
+                <input type="hidden" name="id" value="0" />
+                <!--<p>Ввдите название жанра: </p>-->
                 <input type="text" value="" name="name">
-                <input type="submit" value="Create" id="postGenreSubmit">
+                <input type="submit" value="Save" id="postGenreSubmit">
             </form>
 
 

@@ -227,9 +227,24 @@ namespace WebMusicAPI.Controllers
 
         //GET: api/Genre
         [HttpGet("Genre")]
-        public async Task<ActionResult<IEnumerable<Genre>>> GetGenre()
+        public async Task<ActionResult<IEnumerable<Genre>>> GetGenres()
         {
             return await _context.genre.ToListAsync();
+        }
+
+        [HttpGet("Genre"+"{id}")]
+        public async Task<ActionResult<Genre>> GetGenre(int id)
+        {
+            if (!ModelState.IsValid)
+            {
+                return BadRequest(ModelState);
+            }
+            var genre = await _context.genre.SingleOrDefaultAsync(m => m.Id == id);
+            if (genre == null)
+            {
+                return NotFound();
+            }
+            return new ObjectResult(genre);
         }
 
         //POST: api/Genre/Add

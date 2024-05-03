@@ -16,37 +16,31 @@
     </style>
 </head>
 <script>
-   
-   
-    $(document).ready(function () {
-      
+    function clearContent(containerId) {
+        
+        $("#" + containerId).empty();
+        $("#" + containerId + "-clearButton").hide();
+    }
 
-       
-       
-        $("#accordion").accordion();
+    function updateContent(containerId, contentHtml) {
+        
+        $("#" + containerId).html(contentHtml);
+        $("#" + containerId + "-clearButton").show();
+    }
 
-        $("#postGenreSubmit").click(function (e) {
-            e.preventDefault(); // Prevent the default form submission
-            let form = document.forms["postGenreForm"];
-            let genreName = form.elements["name"].value;
-
-            CreateGenre(genreName)
-        });
-    });
     function CreateGenre(genreName) {
         $.ajax({
             url: "https://localhost:7107/api/webMusic/Genre",
             contentType: "application/json",
             method: "POST",
             data: JSON.stringify({
-                name: genreName,
-               
+                name: genreName
             }),
             success: function () {
                 Swal.fire({
                     position: "center",
                     icon: "success",
-                    title: "Успешно добавленно",
+                    title: "Успешно добавлено",
                     showConfirmButton: false,
                     timer: 1500
                 });
@@ -54,22 +48,80 @@
             error: function (x) {
                 Swal.fire({
                     position: "center",
-                    
                     icon: "error",
                     title: "Что-то не так. Статус: " + x.status,
                     showConfirmButton: false,
                     timer: 1800
                 });
             }
-        })
+        });
     }
+
+    function getGenres() {
+        $.ajax({
+            url: "https://localhost:7107/api/webMusic/Genre",
+            method: "GET",
+            contentType: "application/json",
+            success: function (genres) {
+                var genresHtml = "";
+
+                $.each(genres, function (index, genre) {
+                    genresHtml += "<div>" + genre.name + "</div>";
+                });
+
+                updateContent("genresContainer", genresHtml);
+
+               
+            },
+            error: function (x) {
+                Swal.fire({
+                    position: "center",
+                    icon: "error",
+                    title: "Что-то не так. Статус: " + x.status,
+                    showConfirmButton: false,
+                    timer: 1800
+                });
+            }
+        });
+    }
+
+    $(document).ready(function () {
+
+        $("[id$='-clearButton']").click(function () {
+            var containerId = $(this).attr("data-containerId");
+            clearContent(containerId);
+        });
+
+        $("#accordion").accordion();
+      
+        $("#postGenreSubmit").click(function (e) {
+            e.preventDefault();
+            let form = document.forms["postGenreForm"];
+            let genreName = form.elements["name"].value;
+
+            CreateGenre(genreName)
+        });
+
+        $("#getGenresSubmit").click(getGenres);
+        
+       
+    });
 </script>
+
 
 </head>
 <body>
     <dl id="accordion">
         <dt>Genre</dt>
+
         <dd>
+            <input type="button" value="Get all items" id="getGenresSubmit">
+            <input type="button" value="Clear genres" id="genresContainer-clearButton" data-containerId="genresContainer">
+            <table>
+                <tr>
+                    <td id="genresContainer"></td>
+                </tr>
+            </table>
             <form name="postGenreForm">
                 <p>Ввдите название жанра: </p>
                 <input type="text" value="" name="name">

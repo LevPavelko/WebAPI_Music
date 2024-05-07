@@ -73,8 +73,15 @@
             method: "PUT",
             data: request,
             success: function (genre) {
-                alert("as");
-                let form = document.forms["postGenreForm"];
+                Swal.fire({
+                    position: "center",
+                    icon: "success",
+                    title: "Успешно изменено",
+                    showConfirmButton: false,
+                    timer: 1500
+                });
+
+                let form = document.forms["postUserForm"];
                 form.reset();
                 form.elements["id"].value = 0;
             },
@@ -92,8 +99,8 @@
             success: function (genres) {
                 var genresHtml = "";
                 $.each(genres, function (index, genre) {
-                    genresHtml += "<div><span>" + genre.name + "</span><button id='genreChange' class='editLink' data-id='" + genre.id + "'>change</button>"
-                        + "<button id='genreDelete' class='removeLink' data-id='" + genre.id + "'>delete</button>" + "</div>";
+                    genresHtml += "<div><span>" + genre.name + "</span><button id='genreChange' class='editGenre' data-id='" + genre.id + "'>change</button>"
+                        + "<button id='genreDelete' class='removeGenre' data-id='" + genre.id + "'>delete</button>" + "</div>";
                 });
 
 
@@ -112,6 +119,7 @@
             }
         });
     }
+
     function GetGenre(id) {
         $.ajax({
             url: "https://localhost:7107/api/webMusic/Genre" + id,
@@ -163,6 +171,167 @@
        
     }
 
+    function CreateUser(firstName, lastName, login,email,password,salt,status) {
+        $.ajax({
+            url: "https://localhost:7107/api/webMusic/Users",
+            contentType: "application/json",
+            method: "POST",
+            data: JSON.stringify({
+                firstName: firstName,
+                lastName: lastName,
+                login: login,
+                email: email,
+                password: password,
+                salt: salt,
+                status: status
+            }),
+            success: function () {
+                Swal.fire({
+                    position: "center",
+                    icon: "success",
+                    title: "Успешно добавлено",
+                    showConfirmButton: false,
+                    timer: 1500
+                });
+                let form = document.forms["postUserForm"];
+                form.reset();
+                form.elements["id"].value = 0;
+            },
+            error: function (x) {
+                Swal.fire({
+                    position: "center",
+                    icon: "error",
+                    title: "Что-то не так. Статус: " + x.status,
+                    showConfirmButton: false,
+                    timer: 1800
+                });
+            }
+        });
+    }
+
+    function EditUser(userId, firstName, lastName, login, email, password, salt, status) {
+        let request = JSON.stringify({
+            id: userId,
+            firstName: firstName,
+            lastName: lastName,
+            login: login,
+            email: email,
+            password: password,
+            salt: salt,
+            status: status
+
+        });
+        $.ajax({
+            url: "https://localhost:7107/api/webMusic/Users",
+            contentType: "application/json",
+            method: "PUT",
+            data: request,
+            success: function (user) {
+                Swal.fire({
+                    position: "center",
+                    icon: "success",
+                    title: "Успешно изменено",
+                    showConfirmButton: false,
+                    timer: 1500
+                });
+               
+                let form = document.forms["postUserForm"];
+                form.reset();
+                form.elements["id"].value = 0;
+            },
+            error: function (x) {
+                alert(x.status);
+            }
+        })
+    }
+
+    function getUsers() {
+        $.ajax({
+            url: "https://localhost:7107/api/webMusic/Users",
+            method: "GET",
+            contentType: "application/json",
+            success: function (users) {
+                var usersHtml = "";
+                $.each(users, function (index, user) {
+                    usersHtml += "<div><span>" + user.login + "</span><button id='userChange' class='editUser' data-id='" + user.id + "'>change</button>"
+                        + "<button id='userDelete' class='removeUser' data-id='" + user.id + "'>delete</button>" + "</div>";
+                });
+
+
+                updateContent("usersContainer", usersHtml);
+
+
+            },
+            error: function (x) {
+                Swal.fire({
+                    position: "center",
+                    icon: "error",
+                    title: "Что-то не так. Статус: " + x.status,
+                    showConfirmButton: false,
+                    timer: 1800
+                });
+            }
+        });
+    }
+
+    function GetUser(id) {
+        $.ajax({
+            url: "https://localhost:7107/api/webMusic/Users/" + id,
+            method: 'GET',
+            contentType: "application/json",
+            success: function (user) {
+                let form = document.forms["postUserForm"];
+                form.elements["id"].value = user.id;
+                form.elements["firstName"].value = user.firstName;
+                form.elements["lastName"].value = user.lastName;
+                form.elements["login"].value = user.login;
+                form.elements["email"].value = user.email;
+                form.elements["password"].value = user.password;
+                form.elements["salt"].value = user.salt;
+                form.elements["status"].value = user.status;
+
+
+            },
+            error: function (x) {
+                alert(x.status);
+            }
+        });
+    }
+
+    function DeleteUser(id) {
+
+        Swal.fire({
+            title: "Are you sure?",
+            text: "You won't be able to revert this!",
+            icon: "warning",
+            showCancelButton: true,
+            confirmButtonColor: "#3085d6",
+            cancelButtonColor: "#d33",
+            confirmButtonText: "Yes, delete it!"
+        }).then((result) => {
+            if (result.isConfirmed) {
+                $.ajax({
+                    url: "https://localhost:7107/api/webMusic/Users/" + id,
+                    contentType: "application/json",
+                    method: "DELETE",
+
+                    error: function (x, y, z) {
+                        alert(x.status + '\n' + y + '\n' + z);
+                    }
+                })
+
+                Swal.fire({
+                    title: "Deleted!",
+                    text: "Your file has been deleted.",
+                    icon: "success"
+                });
+            }
+        });
+
+
+
+    }
+
     $(document).ready(function () {
 
         $("[id$='-clearButton']").click(function () {
@@ -172,7 +341,7 @@
 
         $("#accordion").accordion();
         
-
+        
         $("#postGenreSubmit").click(function (e) {
             e.preventDefault();
             let form = document.forms["postGenreForm"];
@@ -184,17 +353,51 @@
                 EditGenre(genreId, genreName);
             
         });
-        
+
         $("#getGenresSubmit").click(getGenres);
+
         
-        $("body").on("click", ".editLink", function () {
+
+
+        $("body").on("click", ".editGenre", function () {
             let id = $(this).data("id");
             GetGenre(id);
         });
 
-        $("body").on("click", ".removeLink", function () {
+        $("body").on("click", ".removeGenre", function () {
             let id = $(this).data("id");
             DeleteGenre(id);
+        });
+
+        $("#postUserSubmit").click(function (e) {
+            e.preventDefault();
+            let form = document.forms["postUserForm"];
+            let userId = form.elements["id"].value;
+            let firstName = form.elements["firstName"].value;
+            let lastName = form.elements["lastName"].value;
+            let login = form.elements["login"].value;
+            let email = form.elements["email"].value;
+            let password = form.elements["password"].value;
+            let salt = form.elements["salt"].value;
+            let status = form.elements["status"].value;
+
+            if (userId == 0)
+                CreateUser(firstName, lastName, login, email, password, salt, status)
+            else
+                EditUser(userId, firstName, lastName, login, email, password, salt,status);
+
+        });
+
+        $("#getUsersSubmit").click(getUsers);
+
+        $("body").on("click", ".editUser", function () {
+            let id = $(this).data("id");
+            GetUser(id);
+        });
+
+        $("body").on("click", ".removeUser", function () {
+            let id = $(this).data("id");
+          DeleteUser(id);
         });
     });
 </script>
@@ -223,7 +426,40 @@
 
 
         </dd>
+
+        <dt>User</dt>
+
+        <dd>
+            <input type="button" value="Get all items" id="getUsersSubmit">
+            <input type="button" value="Clear users" id="usersContainer-clearButton" data-containerId="usersContainer">
+            <table>
+                <tr>
+                    <td id="usersContainer"></td>
+                </tr>
+            </table>
+            <form name="postUserForm">
+                <input type="hidden" name="id" value="0" />
+                <!--<p>Ввдите название жанра: </p>-->
+                <div style="position: relative">
+                    <input type="text" value="" name="firstName" placeholder="First Name">
+                    <input type="text" value="" name="lastName" placeholder="Last Name">
+                    <input type="text" value="" name="status" placeholder="Status">
+
+                    <input type="submit" value="Save" id="postUserSubmit">
+                </div>
+                <input type="text" value="" name="login" placeholder="Login">
+                <input type="text" value="" name="email" placeholder="Email">
+
+                <input type="text" value="" name="password" placeholder="Password">
+                <input type="text" value="" name="salt" placeholder="Password Config">
+
+            </form>
+
+
+
+        </dd>
     </dl>
+    
 
 </body>
 </html>

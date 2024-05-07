@@ -151,6 +151,7 @@ namespace WebMusicAPI.Controllers
                 Id = u.Id,
                 FirstName = u.FirstName,
                 LastName = u.LastName,
+                Login = u.Login,
                 Email = u.Email,
                 Status = u.Status
                
@@ -159,7 +160,22 @@ namespace WebMusicAPI.Controllers
 
             return users;
         }
-       
+
+        [HttpGet("Users/" + "{id}")]
+        public async Task<ActionResult<Users>> GetUser(int id)
+        {
+            if (!ModelState.IsValid)
+            {
+                return BadRequest(ModelState);
+            }
+            var user = await _context.users.SingleOrDefaultAsync(m => m.Id == id);
+            if (user == null)
+            {
+                return NotFound();
+            }
+            return new ObjectResult(user);
+        }
+
         //POST: api/Users/Add
         [HttpPost("Users")]
         public async Task<ActionResult<Users>> PostUser(UserViewModel u)
@@ -205,7 +221,7 @@ namespace WebMusicAPI.Controllers
             return Ok(user);
         }
         // DELETE: api/Users/3
-        [HttpDelete("User/{id}")]
+        [HttpDelete("Users/{id}")]
         public async Task<ActionResult<Users>> DeleteUser(int id)
         {
             if (!ModelState.IsValid)

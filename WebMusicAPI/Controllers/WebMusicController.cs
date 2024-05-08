@@ -4,6 +4,7 @@ using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using WebMusicAPI.Models;
 using WebMusicAPI.ViewModel;
+using Microsoft.AspNetCore.Identity;
 
 namespace WebMusicAPI.Controllers
 {
@@ -18,14 +19,63 @@ namespace WebMusicAPI.Controllers
             _context = context;
         }
         // GET: api/media
-        [HttpGet("Media")]
+        [HttpGet("Song")]
         public async Task<ActionResult<IEnumerable<Media>>> GetMedia()
         {
             return await _context.media.ToListAsync();
 
         }
 
-        [HttpPost("Media")]
+        [HttpGet("Song/" + "{id}")]
+        public async Task<ActionResult<Media>> GetSong(int id)
+        {
+            if (!ModelState.IsValid)
+            {
+                return BadRequest(ModelState);
+            }
+            var song = await _context.media.SingleOrDefaultAsync(m => m.Id == id);
+            if (song == null)
+            {
+                
+                return NotFound();
+            }
+            var songViewModel = await ConvertToViewModel(song); 
+
+            return new ObjectResult(songViewModel);
+        }
+        private async Task<MediaViewModel> ConvertToViewModel(Media media)
+        {
+            MediaViewModel m = new MediaViewModel();
+          
+
+            Genre genre = await _context.genre.FirstOrDefaultAsync(g => g.Id == media.id_Genre);
+            if (genre == null)
+            {
+                throw new Exception("Genre not found.");
+            }
+
+            Executor executor = await _context.executor.FirstOrDefaultAsync(e => e.Id == media.id_Executor);
+            if (executor == null)
+            {
+                throw new Exception("Executor not found.");
+            }
+
+            var viewModel = new MediaViewModel
+            {
+               
+                Id = media.Id,
+                Title = media.Title,
+                Genre = genre.Name,
+                Executor = executor.Name,
+                Path = media.Path,
+                Id_User = media.Id_User
+            };
+
+            return viewModel;
+        }
+
+
+        [HttpPost("Song")]
         public async Task<ActionResult<Media>> PostMedia(MediaViewModel m)
         {
             if (!ModelState.IsValid)
@@ -74,7 +124,7 @@ namespace WebMusicAPI.Controllers
             return Ok(json);
         }
 
-        [HttpPut("Media")]
+        [HttpPut("Song")]
         public async Task<ActionResult<Media>> PutMediae(MediaViewModel m)
         {
             if (!ModelState.IsValid)
@@ -121,7 +171,7 @@ namespace WebMusicAPI.Controllers
 
             return Ok(json);
         }
-        [HttpDelete("Media/{id}")]
+        [HttpDelete("Song/{id}")]
         public async Task<ActionResult<Media>> DeleteMedia(int id)
         {
             if (!ModelState.IsValid)

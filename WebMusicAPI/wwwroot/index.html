@@ -332,6 +332,163 @@
 
     }
 
+    function CreateSong(title, executor, genre, path, id_user) {
+        $.ajax({
+            url: "https://localhost:7107/api/webMusic/Song",
+            contentType: "application/json",
+            method: "POST",
+            data: JSON.stringify({
+                title: title,
+                executor: executor,
+                genre: genre,
+                path: path,
+                id_user: id_user
+               
+            }),
+            success: function () {
+                Swal.fire({
+                    position: "center",
+                    icon: "success",
+                    title: "Успешно добавлено",
+                    showConfirmButton: false,
+                    timer: 1500
+                });
+                let form = document.forms["postSongForm"];
+                form.reset();
+                form.elements["id"].value = 0;
+            },
+            error: function (x) {
+                Swal.fire({
+                    position: "center",
+                    icon: "error",
+                    title: "Что-то не так. Статус: " + x.status,
+                    showConfirmButton: false,
+                    timer: 1800
+                });
+            }
+        });
+    }
+
+    function EditSong(songId, title , executor, genre, path, id_user) {
+        let request = JSON.stringify({
+            id: songId,
+            title: title,
+            executor: executor,
+            genre: genre,
+            path: path,
+            id_user: id_user
+
+        });
+        $.ajax({
+            url: "https://localhost:7107/api/webMusic/Song",
+            contentType: "application/json",
+            method: "PUT",
+            data: request,
+            success: function (song) {
+                Swal.fire({
+                    position: "center",
+                    icon: "success",
+                    title: "Успешно изменено",
+                    showConfirmButton: false,
+                    timer: 1500
+                });
+
+                let form = document.forms["postSongForm"];
+                form.reset();
+                form.elements["id"].value = 0;
+            },
+            error: function (x) {
+                alert(x.status);
+            }
+        })
+    }
+
+    function getSongs() {
+        $.ajax({
+            url: "https://localhost:7107/api/webMusic/Song",
+            method: "GET",
+            contentType: "application/json",
+            success: function (songs) {
+                var songsHtml = "";
+                $.each(songs, function (index, song) {
+                    songsHtml += "<div><span>" + song.title + "</span><button id='songChange' class='editSong' data-id='" + song.id + "'>change</button>"
+                        + "<button id='songDelete' class='removeSong' data-id='" + song.id + "'>delete</button>" + "</div>";
+                });
+
+
+                updateContent("songsContainer", songsHtml);
+
+
+            },
+            error: function (x) {
+                Swal.fire({
+                    position: "center",
+                    icon: "error",
+                    title: "Что-то не так. Статус: " + x.status,
+                    showConfirmButton: false,
+                    timer: 1800
+                });
+            }
+        });
+    }
+
+    function GetSong(id) {
+        $.ajax({
+            url: "https://localhost:7107/api/webMusic/Song/" + id,
+            method: 'GET',
+            contentType: "application/json",
+            success: function (song) {
+                let form = document.forms["postSongForm"];
+                form.elements["id"].value = song.id;
+                form.elements["title"].value = song.title;
+                form.elements["executor"].value = song.executor;
+                form.elements["genre"].value = song.genre;
+                form.elements["path"].value = song.path;
+                form.elements["id_user"].value = song.id_user;
+                
+
+
+            },
+            error: function (x) {
+                alert(x.status);
+            }
+        });
+    }
+
+    function DeleteSong(id) {
+
+        Swal.fire({
+            title: "Are you sure?",
+            text: "You won't be able to revert this!",
+            icon: "warning",
+            showCancelButton: true,
+            confirmButtonColor: "#3085d6",
+            cancelButtonColor: "#d33",
+            confirmButtonText: "Yes, delete it!"
+        }).then((result) => {
+            if (result.isConfirmed) {
+                $.ajax({
+                    url: "https://localhost:7107/api/webMusic/Song/" + id,
+                    contentType: "application/json",
+                    method: "DELETE",
+
+                    error: function (x, y, z) {
+                        alert(x.status + '\n' + y + '\n' + z);
+                    }
+                })
+
+                Swal.fire({
+                    title: "Deleted!",
+                    text: "Your file has been deleted.",
+                    icon: "success"
+                });
+            }
+        });
+
+
+
+    }
+
     $(document).ready(function () {
 
         $("[id$='-clearButton']").click(function () {
@@ -399,6 +556,34 @@
             let id = $(this).data("id");
           DeleteUser(id);
         });
+
+        $("#postSongSubmit").click(function (e) {
+            e.preventDefault();
+            let form = document.forms["postSongForm"];
+            let songId = form.elements["id"].value;
+            let title = form.elements["title"].value;
+            let executor = form.elements["executor"].value;
+            let genre = form.elements["genre"].value;
+            let path = form.elements["path"].value;
+            let id_user = form.elements["id_user"].value;
+            if (songId == 0)
+                CreateSong(title, executor, genre, path, id_user)
+            else
+                EditSong(songId, title, executor, genre, path, id_user);
+
+        });
+
+        $("#getSongsSubmit").click(getSongs);
+
+        $("body").on("click", ".editSong", function () {
+            let id = $(this).data("id");
+            GetSong(id);
+        });
+
+        $("body").on("click", ".removeSong", function () {
+            let id = $(this).data("id");
+            DeleteSong(id);
+        });
     });
 </script>
 
@@ -452,6 +637,37 @@
 
                 <input type="text" value="" name="password" placeholder="Password">
                 <input type="text" value="" name="salt" placeholder="Password Config">
+
+            </form>
+
+
+
+        </dd>
+
+        <dt>Song</dt>
+
+        <dd>
+            <input type="button" value="Get all items" id="getSongsSubmit">
+            <input type="button" value="Clear users" id="songsContainer-clearButton" data-containerId="songsContainer">
+            <table>
+                <tr>
+                    <td id="songsContainer"></td>
+                </tr>
+            </table>
+            <form name="postSongForm">
+                <input type="hidden" name="id" value="0" />
+                <!--<p>Ввдите название жанра: </p>-->
+                <div style="position: relative">
+                    <input type="text" value="" name="title" placeholder="Title">
+                    <input type="text" value="" name="executor" placeholder="Executor">
+                    <input type="text" value="" name="genre" placeholder="Genre">
+
+                    <input type="submit" value="Save" id="postSongSubmit">
+                </div>
+                <input type="text" value="" name="path" placeholder="Path">
+                <input type="text" value="" name="id_user" placeholder="Id User">
+
+               
 
             </form>
 

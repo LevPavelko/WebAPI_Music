@@ -345,6 +345,7 @@
                 id_user: id_user
                
             }),
+            
             success: function () {
                 Swal.fire({
                     position: "center",
@@ -358,6 +359,7 @@
                 form.elements["id"].value = 0;
             },
             error: function (x) {
+                alert( x.getAllResponseHeaders);
                 Swal.fire({
                     position: "center",
                     icon: "error",
@@ -439,12 +441,12 @@
             contentType: "application/json",
             success: function (song) {
                 let form = document.forms["postSongForm"];
-                form.elements["id"].value = song.id;
-                form.elements["title"].value = song.title;
-                form.elements["executor"].value = song.executor;
-                form.elements["genre"].value = song.genre;
-                form.elements["path"].value = song.path;
-                form.elements["id_user"].value = song.id_user;
+                form.elements["Id"].value = song.id;
+                form.elements["Title"].value = song.title;
+                form.elements["Executor"].value = song.executor;
+                form.elements["Genre"].value = song.genre;
+                form.elements["Path"].value = song.path;
+                form.elements["Id_User"].value = song.id_User;
                 
 
 
@@ -560,12 +562,12 @@
         $("#postSongSubmit").click(function (e) {
             e.preventDefault();
             let form = document.forms["postSongForm"];
-            let songId = form.elements["id"].value;
-            let title = form.elements["title"].value;
-            let executor = form.elements["executor"].value;
-            let genre = form.elements["genre"].value;
-            let path = form.elements["path"].value;
-            let id_user = form.elements["id_user"].value;
+            let songId = form.elements["Id"].value;
+            let title = form.elements["Title"].value;
+            let executor = form.elements["Executor"].value;
+            let genre = form.elements["Genre"].value;
+            let path = form.elements["Path"].value;
+            let id_user = form.elements["Id_User"].value;
             if (songId == 0)
                 CreateSong(title, executor, genre, path, id_user)
             else
@@ -655,17 +657,17 @@
                 </tr>
             </table>
             <form name="postSongForm">
-                <input type="hidden" name="id" value="0" />
+                <input type="hidden" name="Id" value="0" />
                 <!--<p>Ввдите название жанра: </p>-->
                 <div style="position: relative">
-                    <input type="text" value="" name="title" placeholder="Title">
-                    <input type="text" value="" name="executor" placeholder="Executor">
-                    <input type="text" value="" name="genre" placeholder="Genre">
+                    <input type="text" value="" name="Title" placeholder="Title">
+                    <input type="text" value="" name="Executor" placeholder="Executor">
+                    <input type="text" value="" name="Genre" placeholder="Genre">
 
                     <input type="submit" value="Save" id="postSongSubmit">
                 </div>
-                <input type="text" value="" name="path" placeholder="Path">
-                <input type="text" value="" name="id_user" placeholder="Id User">
+                <input type="text" value="" name="Path" placeholder="Path">
+                <input type="text" value="" name="Id_User" placeholder="Id User">
 
                
 
